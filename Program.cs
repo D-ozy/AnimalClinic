@@ -1,4 +1,6 @@
+using AnimalClinic.Services;
 using Microsoft.Extensions.Primitives;
+using System.Collections;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -15,6 +17,9 @@ namespace AnimalClinic
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddSingleton<DB>();
+            builder.Services.AddScoped<AnimalService>();
+
             var app = builder.Build();
 
             app.UseSwagger();
@@ -22,7 +27,6 @@ namespace AnimalClinic
             app.UseMiddleware<LoggerMiddleware>();
 
             app.MapGet("/", async (context) => context.Response.Redirect("/swagger"));
-
             app.MapControllers();
 
             app.Run();

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AnimalClinic.Services;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace AnimalClinic.Controllers
 {
@@ -6,100 +8,66 @@ namespace AnimalClinic.Controllers
     [Route("api/[controller]")]
     public class HomeController : Controller
     {
+        private readonly DB db;
 
-        private readonly static Dictionary<string, Doctor> doctors = new Dictionary<string, Doctor>()
-        {
-            {"Tom", new Doctor {Name = "Tom", Specialization = "Therapist", Description = "First very long description"} },
-            {"John", new Doctor {Name = "John", Specialization = "Surgeon", Description = "Second very long description"} },
-            {"Noah", new Doctor {Name = "Noah", Specialization = "Dermatologist", Description = "Third very long description"} }
-        };
-
-        private static List<Animal> animals = new List<Animal>()
-        {
-            new Animal {Name = "Murzik", Age = 3, Type = AnimalType.Cat, CurrentDoctor = doctors["Tom"]},
-            new Animal {Name = "Muhtar", Age = 7, Type = AnimalType.Dog, CurrentDoctor = doctors["Noah"]}
-        };
+        public HomeController(DB db) => this.db = db;
 
         [HttpGet]
-        public IActionResult GetAllAnimals()
+        public async Task<IActionResult> GetAllAnimals()
         {
+            AnimalService service = new AnimalService(db);
+            List<Animal> animals = await service.GetAllAnimals();
             return new ObjectResult(animals);
         }
 
         [HttpGet("id")]
-        public IActionResult GetAnimal(string id)
+        public async Task<IActionResult> GetAnimal(int id)
         {
-            Animal? animal = animals.FirstOrDefault(a => a.Id == id);
+            AnimalService service = new AnimalService(db);
+            Animal animal = await service.GetAnimal(id);
 
-            if (animal != null)
+            if(animal == null)
             {
-                return new ObjectResult(animal);
+                return StatusCode(404);
             }
-            else
-            {
-                Response.StatusCode = 404;
-                return new ObjectResult(new { message = "NOT FOUND" });
-            }
+
+            return new ObjectResult(animal);
         }
 
         [HttpPost]
-        public IActionResult AddAnimal(CreateAnimalDto userData)
+        public async Task<IActionResult> AddAnimal(AnimalDto userData)
         {
             if (userData == null)
             {
                 Response.StatusCode = 400;
                 return new ObjectResult(new { message = "Incorrect data" });
             }
-
-            Animal animal = new Animal();
-            animal.CurrentDoctor = doctors["Tom"];
-            animal.Name = userData.Name;
-            animal.Age = userData.Age;
-            animal.Type = userData.Type;
-
-            animals.Add(animal);
-
-            return new ObjectResult(animal);
+            
+            AnimalService service = new AnimalService(db);
+            await service.AddAnimal(userData);
+            return StatusCode(201);
         }
 
         [HttpPut]
-        public IActionResult UpdateAnimal(Animal userData)
+        public async Task<IActionResult> UpdateAnimal(int id, AnimalDto userData)
         {
-            if (userData == null)
+            if(userData == null)
             {
                 Response.StatusCode = 400;
                 return new ObjectResult(new { message = "Incorrect data" });
             }
 
-            var animal = animals.FirstOrDefault(a => a.Id == userData.Id);
-
-            if (animal == null)
-            {
-                Response.StatusCode = 404;
-                return new ObjectResult(new { message = "NOT FOUND" });
-            }
-
-            animal.Name = userData.Name;
-            animal.Age = userData.Age;
-            animal.Type = userData.Type;
-
-            return new ObjectResult(animal);
+            AnimalService service = new AnimalService(db);
+            await service.UpdateAnimal(id, userData);
+            return StatusCode(200);
         }
 
         [HttpDelete("id")]
-        public IActionResult RemoveAnimal(string id)
+        public async Task<IActionResult> RemoveAnimal(int id)
         {
-            var animal = animals.FirstOrDefault(a => a.Id == id);
-
-            if (animal == null)
-            {
-                Response.StatusCode = 404;
-                return new ObjectResult(new { message = "NOT FOUND" });
-            }
-
-            animals.Remove(animal);
-
-            return new ObjectResult(animal);
+            AnimalService service = new AnimalService(db);
+            await service.RemoveAnimal(id);
+            return StatusCode(200);
         }
     }
 }
