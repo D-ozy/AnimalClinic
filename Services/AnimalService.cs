@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using AnimalClinic.DTO;
+using AnimalClinic.Model;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Npgsql;
+using System.Security.Cryptography;
 using System.Xml.Linq;
 
 namespace AnimalClinic.Services
@@ -121,6 +124,50 @@ namespace AnimalClinic.Services
 
                 await cmd.ExecuteNonQueryAsync();
             }
+        }
+
+        public async Task<List<Animal>> SearchAnimals(string? name, AnimalType? type, int? age)
+        {
+            List<Animal> animals = new List<Animal>();
+
+            await using var con = new NpgsqlConnection(db.GetConnectionstring());
+            await con.OpenAsync();
+
+            string query = "SELECT * FROM animals WHERE 1=1";
+
+            if (!string.IsNullOrWhiteSpace(name))
+                query += " AND name = @name";
+            if (type != null)
+                query += " AND type = @type";
+            if (age != null && age != 0)
+                query += " AND age = @age";
+
+            using (NpgsqlCommand cmd = new NpgsqlCommand(query, con))
+            {
+                if (!string.IsNullOrWhiteSpace(name))
+                    cmd.Parameters.AddWithValue("name", name);
+                if (type != null)
+                    cmd.Parameters.AddWithValue("type", type.ToString());
+                if (age != null && age != 0)
+                    cmd.Parameters.AddWithValue("age", age);
+
+                using(NpgsqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        animals.Add(new Animal
+                        {
+                            Id = Convert.ToInt32(reader["id"]),
+                            Name = reader["name"].ToString(),
+                            Age = Convert.ToInt32(reader["age"]),
+                            Type = Enum.Parse<AnimalType>(reader["type"].ToString()),
+                            CurrentDoctor = Convert.ToInt32(reader["doctor_id"])
+                        });
+                    }
+                }
+            }
+
+            return animals;
         }
     }
 }

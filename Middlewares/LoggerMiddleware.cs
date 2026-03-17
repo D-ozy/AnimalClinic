@@ -1,4 +1,4 @@
-﻿namespace AnimalClinic
+﻿namespace AnimalClinic.Middlewares
 {
     public class LoggerMiddleware
     {

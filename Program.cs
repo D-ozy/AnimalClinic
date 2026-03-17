@@ -1,3 +1,4 @@
+using AnimalClinic.Middlewares;
 using AnimalClinic.Services;
 using Microsoft.Extensions.Primitives;
 using System.Collections;
@@ -22,9 +23,19 @@ namespace AnimalClinic
 
             var app = builder.Build();
 
+            //app.UseStaticFiles();
             app.UseSwagger();
             app.UseSwaggerUI();
+
             app.UseMiddleware<LoggerMiddleware>();
+
+            app.UseRouting();
+
+            app.MapControllerRoute( 
+                    name: "default",
+                    pattern: "home/{1}/{2}",
+                    defaults: new {controller = "home", action = "index"}
+                );
 
             app.MapGet("/", async (context) => context.Response.Redirect("/swagger"));
             app.MapControllers();

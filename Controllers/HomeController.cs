@@ -1,4 +1,6 @@
-﻿using AnimalClinic.Services;
+﻿using AnimalClinic.DTO;
+using AnimalClinic.Model;
+using AnimalClinic.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -9,13 +11,17 @@ namespace AnimalClinic.Controllers
     public class HomeController : Controller
     {
         private readonly DB db;
+        private readonly AnimalService service;
 
-        public HomeController(DB db) => this.db = db;
+        public HomeController(DB db, AnimalService service)
+        {
+            this.db = db;
+            this.service = service;
+        }
 
         [HttpGet]
         public async Task<IActionResult> GetAllAnimals()
         {
-            AnimalService service = new AnimalService(db);
             List<Animal> animals = await service.GetAllAnimals();
             return new ObjectResult(animals);
         }
@@ -23,7 +29,6 @@ namespace AnimalClinic.Controllers
         [HttpGet("id")]
         public async Task<IActionResult> GetAnimal(int id)
         {
-            AnimalService service = new AnimalService(db);
             Animal animal = await service.GetAnimal(id);
 
             if(animal == null)
@@ -32,6 +37,17 @@ namespace AnimalClinic.Controllers
             }
 
             return new ObjectResult(animal);
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchAnimals(string? name, AnimalType? type, int? age)
+        {
+            List<Animal> animals = await service.SearchAnimals(name, type, age);
+
+            if (animals == null || animals.Count == 0)
+                return StatusCode(400);
+
+            return new ObjectResult(animals);
         }
 
         [HttpPost]
@@ -43,7 +59,6 @@ namespace AnimalClinic.Controllers
                 return new ObjectResult(new { message = "Incorrect data" });
             }
             
-            AnimalService service = new AnimalService(db);
             await service.AddAnimal(userData);
             return StatusCode(201);
         }
@@ -57,7 +72,6 @@ namespace AnimalClinic.Controllers
                 return new ObjectResult(new { message = "Incorrect data" });
             }
 
-            AnimalService service = new AnimalService(db);
             await service.UpdateAnimal(id, userData);
             return StatusCode(200);
         }
@@ -65,7 +79,6 @@ namespace AnimalClinic.Controllers
         [HttpDelete("id")]
         public async Task<IActionResult> RemoveAnimal(int id)
         {
-            AnimalService service = new AnimalService(db);
             await service.RemoveAnimal(id);
             return StatusCode(200);
         }

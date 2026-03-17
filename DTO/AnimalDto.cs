@@ -1,4 +1,6 @@
-﻿namespace AnimalClinic
+﻿using AnimalClinic.Model;
+
+namespace AnimalClinic.DTO
 {
     public class AnimalDto
     {

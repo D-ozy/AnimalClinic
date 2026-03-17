@@ -1,5 +1,8 @@
-﻿namespace AnimalClinic
+﻿using System.Text.Json.Serialization;
+
+namespace AnimalClinic.Model
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum AnimalType {
         Cat = 1,
         Dog,
