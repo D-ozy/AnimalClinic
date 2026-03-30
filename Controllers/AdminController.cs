@@ -1,29 +1,39 @@
-﻿using AnimalClinic.DTO;
-using AnimalClinic.Model;
-using AnimalClinic.Services;
-using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Mvc;
+using AnimalClinicLogic.DTO;
+using AnimalClinicLogic.Models;
+using AnimalClinicLogic.Services;
+using AnimalClinicLogic;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace AnimalClinic.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class HomeController : Controller
+    [Authorize(Roles = "admin")]
+    public class AdminController : Controller
     {
         private readonly DB db;
-        private readonly AnimalService service;
+        private readonly AdminService service;
 
-        public HomeController(DB db, AnimalService service)
+        public AdminController(DB db, AdminService service)
         {
             this.db = db;
             this.service = service;
         }
 
-        [HttpGet]
+        [HttpGet("animals")]
         public async Task<IActionResult> GetAllAnimals()
         {
             List<Animal> animals = await service.GetAllAnimals();
             return new ObjectResult(animals);
+        }
+
+        [HttpGet("users")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            List<User> users = await service.GetAllUsers();
+            return new ObjectResult(users);
         }
 
         [HttpGet("id")]
@@ -81,6 +91,13 @@ namespace AnimalClinic.Controllers
         {
             await service.RemoveAnimal(id);
             return StatusCode(200);
+        }
+
+        [HttpGet("statistics")]
+        public async Task<IActionResult> GetStatistics()
+        {
+            var stats = await service.GetStatistics();
+            return Ok(stats);
         }
     }
 }

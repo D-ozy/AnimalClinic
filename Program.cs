@@ -1,10 +1,13 @@
 using AnimalClinic.Middlewares;
-using AnimalClinic.Services;
-using Microsoft.Extensions.Primitives;
-using System.Collections;
+using AnimalClinicLogic;
+using AnimalClinicLogic.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using StackExchange.Redis;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace AnimalClinic
 {
@@ -18,8 +21,46 @@ namespace AnimalClinic
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+
+            var key = "f8Dk2!sL9@qPzX7#vB4mN6cR1tYwE3uH";
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options => {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(key)
+                        )
+                    };
+
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            if (context.Request.Cookies.ContainsKey("jwt"))
+                            {
+                                context.Token = context.Request.Cookies["jwt"];
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
+                });
+
+            builder.Services.AddAuthorization();
+
             builder.Services.AddSingleton<DB>();
-            builder.Services.AddScoped<AnimalService>();
+            builder.Services.AddScoped<AdminService>();
+            builder.Services.AddScoped<AuthService>();
+            builder.Services.AddScoped<UserService>();
+
+            builder.Services.AddSingleton<IConnectionMultiplexer>(
+                    ConnectionMultiplexer.Connect("localhost:6379")
+                );
 
             var app = builder.Build();
 
@@ -30,12 +71,8 @@ namespace AnimalClinic
             app.UseMiddleware<LoggerMiddleware>();
 
             app.UseRouting();
-
-            app.MapControllerRoute( 
-                    name: "default",
-                    pattern: "home/{1}/{2}",
-                    defaults: new {controller = "home", action = "index"}
-                );
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.MapGet("/", async (context) => context.Response.Redirect("/swagger"));
             app.MapControllers();

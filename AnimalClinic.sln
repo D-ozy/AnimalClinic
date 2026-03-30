@@ -5,7 +5,7 @@ VisualStudioVersion = 17.14.36429.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimalClinic", "AnimalClinic.csproj", "{15B59F77-7C48-4C99-BA5F-8F7C38C4336F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimalClinic.Services", "..\AnimalClinic.Services\AnimalClinic.Services.csproj", "{7373B647-E7A6-4FA8-8FE8-EC12E112529C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimalClinicLogic", "..\AnimalClinicLogic\AnimalClinicLogic.csproj", "{00A948D0-1785-48F3-98C4-68FE8DF276E4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{15B59F77-7C48-4C99-BA5F-8F7C38C4336F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{15B59F77-7C48-4C99-BA5F-8F7C38C4336F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{15B59F77-7C48-4C99-BA5F-8F7C38C4336F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7373B647-E7A6-4FA8-8FE8-EC12E112529C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7373B647-E7A6-4FA8-8FE8-EC12E112529C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7373B647-E7A6-4FA8-8FE8-EC12E112529C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7373B647-E7A6-4FA8-8FE8-EC12E112529C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00A948D0-1785-48F3-98C4-68FE8DF276E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00A948D0-1785-48F3-98C4-68FE8DF276E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00A948D0-1785-48F3-98C4-68FE8DF276E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00A948D0-1785-48F3-98C4-68FE8DF276E4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
