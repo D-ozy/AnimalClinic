@@ -1,0 +1,23 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "AnimalClinic.Grpc";
+
+package clinicstats;
+
+service ClinicStatsService {
+
+  rpc GetClinicStats (StatsRequest) returns (StatsResponse);
+
+}
+
+message StatsRequest {
+}
+
+message StatsResponse {
+
+  int32 totalUsers = 1;
+  int32 totalAnimals = 2;
+  map<string, int32> animalsByType = 3;
+  double averageAnimalAge = 4;
+  string source = 5;
+}

@@ -1,3 +1,4 @@
+using AnimalClinic.Grpc;
 using AnimalClinic.Middlewares;
 using AnimalClinicLogic;
 using AnimalClinicLogic.Services;
@@ -20,6 +21,11 @@ namespace AnimalClinic
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddGrpc(options =>
+            {
+                options.Interceptors.Add<AnimalClinic.Grpc.GrpcLoggingInterceptor>();
+            });
 
 
             var key = "f8Dk2!sL9@qPzX7#vB4mN6cR1tYwE3uH";
@@ -62,20 +68,25 @@ namespace AnimalClinic
                     ConnectionMultiplexer.Connect("localhost:6379")
                 );
 
+
+
             var app = builder.Build();
 
             //app.UseStaticFiles();
             app.UseSwagger();
             app.UseSwaggerUI();
 
-            app.UseMiddleware<LoggerMiddleware>();
-
             app.UseRouting();
+
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapGet("/", async (context) => context.Response.Redirect("/swagger"));
+            app.UseMiddleware<LoggerMiddleware>();
+
+
+            app.MapGrpcService<ClinicStatsGrpcService>();
             app.MapControllers();
+            app.MapGet("/", async (context) => context.Response.Redirect("/swagger"));
 
             app.Run();
         }
