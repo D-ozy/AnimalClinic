@@ -4,6 +4,8 @@ using AnimalClinicLogic.Models;
 using AnimalClinicLogic.Services;
 using AnimalClinicLogic;
 using Microsoft.AspNetCore.Authorization;
+using AnimalClinic.Services;
+using AnimalClinic.Contracts;
 
 
 namespace AnimalClinic.Controllers
@@ -15,10 +17,12 @@ namespace AnimalClinic.Controllers
     {
         private readonly DB db;
         private readonly AdminService service;
+        private readonly KafkaProducer producer;
 
-        public AdminController(DB db, AdminService service)
+        public AdminController(DB db, AdminService service, KafkaProducer producer)
         {
             this.db = db;
+            this.producer = producer;
             this.service = service;
         }
 
@@ -61,15 +65,31 @@ namespace AnimalClinic.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddAnimal(AnimalDto userData)
+        public async Task<IActionResult> AddAnimal(AnimalDto userData, [FromHeader(Name = "Idempotency-Key")] Guid? idempotencyKey)
         {
             if (userData == null)
             {
-                Response.StatusCode = 400;
-                return new ObjectResult(new { message = "Incorrect data" });
+                return BadRequest(new { message = "Incorrect data" });
             }
-            
-            await service.AddAnimal(userData);
+
+            var key = idempotencyKey ?? Guid.NewGuid();
+
+            var animal = await service.AddAnimal(userData);
+
+            var animalCreatedEvent = new AnimalCreatedEvent
+            {
+                EventId = Guid.NewGuid(),
+                IdempotencyKey = key,
+
+                AnimalId = animal.Id,
+                Name = userData.Name,
+                Type = userData.Type.ToString(),
+
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await producer.PublishAsync(animalCreatedEvent);
+
             return StatusCode(201);
         }
 

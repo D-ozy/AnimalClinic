@@ -1,5 +1,6 @@
 using AnimalClinic.Grpc;
 using AnimalClinic.Middlewares;
+using AnimalClinic.Services;
 using AnimalClinicLogic;
 using AnimalClinicLogic.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -60,6 +61,7 @@ namespace AnimalClinic
             builder.Services.AddAuthorization();
 
             builder.Services.AddSingleton<DB>();
+            builder.Services.AddSingleton<KafkaProducer>();
             builder.Services.AddScoped<AdminService>();
             builder.Services.AddScoped<AuthService>();
             builder.Services.AddScoped<UserService>();
